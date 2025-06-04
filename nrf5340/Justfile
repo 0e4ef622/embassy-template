@@ -12,6 +12,8 @@ flash-chiperase:
     make flash-chiperase
 flash-recover:
     make flash-recover
+reset:
+    make reset
 
 format:
     cd app-core && cargo fmt
@@ -22,3 +24,5 @@ alias fmt := format
     probe-rs attach --chip nRF5340_xxAA "{{ output_dir }}/app-core.elf"
 @attach-net:
     probe-rs attach --chip nRF5340_xxAA "{{ output_dir }}/net-core.elf"
+@serial *args:
+    cd serialtest && cargo run {{ args }}

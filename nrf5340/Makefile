@@ -10,12 +10,16 @@ all: $(OUTPUT_DIR)/merged.hex
 $(OUTPUT_DIR):
 	mkdir "$(OUTPUT_DIR)"
 
-$(OUTPUT_DIR)/app-core.elf: $(shell find ./app-core -path ./$(APP_TARGET_DIR) -prune -o -print) | $(OUTPUT_DIR)
+$(APP_ARTIFACT_DIR)/app-core: $(shell find ./app-core -path ./$(APP_TARGET_DIR) -prune -o -print)
 	cd app-core && cargo build --release
+
+$(OUTPUT_DIR)/app-core.elf: $(APP_ARTIFACT_DIR)/app-core | $(OUTPUT_DIR)
 	cp $(APP_ARTIFACT_DIR)/app-core $@
 
-$(OUTPUT_DIR)/net-core.elf: $(shell find ./net-core -path ./$(NET_TARGET_DIR) -prune -o -print) | $(OUTPUT_DIR)
+$(NET_ARTIFACT_DIR)/net-core: $(shell find ./net-core -path ./$(NET_TARGET_DIR) -prune -o -print)
 	cd net-core && cargo build --release
+
+$(OUTPUT_DIR)/net-core.elf: $(NET_ARTIFACT_DIR)/net-core | $(OUTPUT_DIR)
 	cp $(NET_ARTIFACT_DIR)/net-core $@
 
 $(OUTPUT_DIR)/%.hex: $(OUTPUT_DIR)/%.elf
@@ -24,9 +28,13 @@ $(OUTPUT_DIR)/%.hex: $(OUTPUT_DIR)/%.elf
 $(OUTPUT_DIR)/merged.hex: $(OUTPUT_DIR)/app-core.hex $(OUTPUT_DIR)/net-core.hex
 	mergehex -o $@ -m $^
 
+.PHONY: cleanall
+cleanall:
+	rm -r $(OUTPUT_DIR) $(APP_TARGET_DIR) $(NET_TARGET_DIR)
+
 .PHONY: clean
 clean:
-	rm -r $(OUTPUT_DIR) $(APP_TARGET_DIR) $(NET_TARGET_DIR)
+	rm -r $(OUTPUT_DIR)
 
 .PHONY: flash
 flash: $(OUTPUT_DIR)/merged.hex
