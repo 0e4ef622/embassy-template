@@ -1,0 +1,21 @@
+[package]
+name = "nrf52840dongle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", features = ["arch-cortex-m", "executor-thread"] }
+embassy-nrf = { git = "https://github.com/embassy-rs/embassy.git", features = ["nrf52840", "time-driver-rtc1", "gpiote", "time", "unstable-pac"] }
+embassy-time = { git = "https://github.com/embassy-rs/embassy.git" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy.git" }
+embassy-usb = { git = "https://github.com/embassy-rs/embassy.git", features = ["defmt"] }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy.git" }
+
+cortex-m-rt = "0.7.5"
+cortex-m = { version = "0.7.7", features = ["inline-asm", "critical-section-single-core"] }
+defmt = "1"
+static_cell = "2.1.0"
+critical-section = "1.2.0"
+
+[profile.release]
+debug = 2

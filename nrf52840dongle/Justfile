@@ -1,0 +1,2 @@
+attach path="/dev/ttyACM1":
+    defmt-print --log-format oneline -e target/thumbv7em-none-eabihf/release/nrf52840dongle serial --path {{ path }}

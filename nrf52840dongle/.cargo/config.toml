@@ -1,0 +1,10 @@
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# replace nRF82840_xxAA with your chip as listed in `probe-rs chip list`
+runner = "nrfdfu"
+
+[build]
+target = "thumbv7em-none-eabihf"
+
+[env]
+DEFMT_LOG = "info"
+# RUSTC_LOG = "rustc_codegen_ssa::back::link=info"
