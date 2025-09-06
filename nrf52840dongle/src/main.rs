@@ -55,12 +55,10 @@ async fn main(mut spawner: Spawner) {
 
     // Initialize global logger
     defmt_serial::init(&mut spawner, builder);
+    defmt::info!("Successfully initialized");
 
-    for i in 0..10 {
-        defmt::info!("{}", i);
+    loop {
+        defmt::info!("Hello, World!");
         Timer::after_secs(1).await;
     }
-    let mpu = unsafe { &*cortex_m::peripheral::MPU::PTR };
-    let mpu_type = mpu._type.read();
-    defmt::info!("0x{:04x}", mpu_type);
 }

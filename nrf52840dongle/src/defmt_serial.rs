@@ -33,40 +33,22 @@ pub fn init(spawner: &mut Spawner, mut builder: Builder<'static, Driver>) {
 
 static PIPE: Pipe<CriticalSectionRawMutex, 256> = Pipe::new();
 async fn log_loop(mut class: CdcAcmClass<'static, Driver>) {
-    let mut red = Output::new(unsafe { P0_08::steal() }, Level::Low, OutputDrive::Standard);
-    let mut green = Output::new(unsafe { P1_09::steal() }, Level::High, OutputDrive::Standard);
-
-    let mut set_state = |s| {
-        if s {
-            red.set_high();
-            green.set_low();
-        } else {
-            red.set_low();
-            green.set_high();
-        }
-    };
-
     class.wait_connection().await;
 
     let mut buf = [0; 64];
-
     let (mut send, _recv, ctl) = class.split_with_control();
-    while !send.rts() {
-        set_state(false);
+    while !send.dtr() {
         ctl.control_changed().await;
     }
-    set_state(true);
 
     Timer::after_millis(5).await;
 
     loop {
         let mut n = PIPE.read(&mut buf).await;
         loop {
-            while !send.rts() {
-                set_state(false);
+            while !send.dtr() {
                 ctl.control_changed().await;
             }
-            set_state(true);
             let _ = send.write_packet(&buf[..n]).await;
             if n == 0 {
                 break;
