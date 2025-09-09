@@ -24,6 +24,7 @@ bind_interrupts!(struct Irqs {
 
 #[embassy_executor::main]
 async fn main(mut spawner: Spawner) {
+    defmt::info!("Booted");
     let p = embassy_nrf::init(Default::default());
 
     // Create the driver, from the HAL.
@@ -57,8 +58,9 @@ async fn main(mut spawner: Spawner) {
     defmt_serial::init(&mut spawner, builder);
     defmt::info!("Successfully initialized");
 
-    loop {
+    for _ in 0..10 {
         defmt::info!("Hello, World!");
         Timer::after_secs(1).await;
     }
+    defmt::panic!("dead");
 }

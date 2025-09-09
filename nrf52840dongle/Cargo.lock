@@ -203,6 +203,7 @@ name = "embassy-embedded-hal"
 version = "0.3.0"
 source = "git+https://github.com/embassy-rs/embassy.git#94f9b2707486ca3eade5bf4b237edf3d6aa90f35"
 dependencies = [
+ "defmt",
  "embassy-futures",
  "embassy-hal-internal",
  "embassy-sync",
@@ -249,6 +250,7 @@ source = "git+https://github.com/embassy-rs/embassy.git#94f9b2707486ca3eade5bf4b
 dependencies = [
  "cortex-m",
  "critical-section",
+ "defmt",
  "num-traits",
 ]
 
@@ -277,6 +279,7 @@ dependencies = [
  "cortex-m",
  "cortex-m-rt",
  "critical-section",
+ "defmt",
  "document-features",
  "embassy-embedded-hal",
  "embassy-hal-internal",
@@ -305,6 +308,7 @@ source = "git+https://github.com/embassy-rs/embassy.git#94f9b2707486ca3eade5bf4b
 dependencies = [
  "cfg-if",
  "critical-section",
+ "defmt",
  "embedded-io-async",
  "futures-sink",
  "futures-util",
@@ -318,6 +322,7 @@ source = "git+https://github.com/embassy-rs/embassy.git#94f9b2707486ca3eade5bf4b
 dependencies = [
  "cfg-if",
  "critical-section",
+ "defmt",
  "document-features",
  "embassy-time-driver",
  "embedded-hal 0.2.7",
@@ -571,6 +576,7 @@ dependencies = [
  "embassy-nrf",
  "embassy-sync",
  "embassy-time",
+ "embassy-time-driver",
  "embassy-usb",
  "static_cell",
 ]

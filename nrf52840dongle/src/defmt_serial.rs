@@ -1,16 +1,19 @@
 #[macro_use]
 mod sus;
+mod timer;
 
-use core::{cell::UnsafeCell, panic::PanicInfo, sync::atomic::{AtomicBool, Ordering}, task::{Context, Waker}};
+use core::{cell::UnsafeCell, panic::PanicInfo, sync::atomic::{AtomicBool, Ordering}, task::Context};
 
 use critical_section::RestoreState;
 use defmt::{Encoder, Logger};
 use embassy_executor::{task, Spawner};
 use embassy_nrf::{gpio::{Level, Output, OutputDrive}, peripherals::{P0_06, P0_08, P1_09, USBD}, usb::vbus_detect::HardwareVbusDetect};
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, pipe::Pipe};
-use embassy_time::Timer;
+use timer::Timer;
 use embassy_usb::{class::cdc_acm::{CdcAcmClass, State}, Builder, UsbDevice};
 use static_cell::ConstStaticCell;
+
+use crate::defmt_serial::timer::NOOP_WAKER;
 
 type Driver = embassy_nrf::usb::Driver<'static, USBD, HardwareVbusDetect>;
 
@@ -31,7 +34,7 @@ pub fn init(spawner: &mut Spawner, mut builder: Builder<'static, Driver>) {
     }
 }
 
-static PIPE: Pipe<CriticalSectionRawMutex, 256> = Pipe::new();
+static PIPE: Pipe<CriticalSectionRawMutex, 1024> = Pipe::new();
 async fn log_loop(mut class: CdcAcmClass<'static, Driver>) {
     class.wait_connection().await;
 
@@ -41,7 +44,7 @@ async fn log_loop(mut class: CdcAcmClass<'static, Driver>) {
         ctl.control_changed().await;
     }
 
-    Timer::after_millis(5).await;
+    Timer::after_millis(50).await;
 
     loop {
         let mut n = PIPE.read(&mut buf).await;
@@ -130,8 +133,6 @@ unsafe impl Logger for SerialLogger {
 fn push_log_bytes(mut bytes: &[u8]) {
     loop {
         let Ok(n) = PIPE.try_write(bytes) else {
-            let led1 = Output::new(unsafe { P0_06::steal() }, Level::Low, OutputDrive::Standard);
-            core::mem::forget(led1);
             return;
         };
         bytes = &bytes[n..];
@@ -154,7 +155,7 @@ fn panic(info: &PanicInfo) -> ! {
         defmt::error!("{}", defmt::Display2Format(info));
 
         // Try to keep usb alive for logs
-        let mut cx = Context::from_waker(Waker::noop());
+        let mut cx = Context::from_waker(NOOP_WAKER);
         loop {
             unsafe {
                 match LOG_FUT.get() {
