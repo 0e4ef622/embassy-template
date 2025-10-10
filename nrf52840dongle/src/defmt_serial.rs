@@ -2,16 +2,24 @@
 mod sus;
 mod timer;
 
-use core::{cell::UnsafeCell, panic::PanicInfo, sync::atomic::{AtomicBool, Ordering}, task::Context};
+use core::{
+    cell::UnsafeCell,
+    panic::PanicInfo,
+    sync::atomic::{AtomicBool, Ordering},
+    task::Context,
+};
 
 use critical_section::RestoreState;
 use defmt::{Encoder, Logger, unwrap};
-use embassy_executor::{task, Spawner};
+use embassy_executor::{Spawner, task};
 use embassy_nrf::usb::vbus_detect::HardwareVbusDetect;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, pipe::Pipe};
-use timer::Timer;
-use embassy_usb::{class::cdc_acm::{CdcAcmClass, State}, Builder, UsbDevice};
+use embassy_usb::{
+    Builder, UsbDevice,
+    class::cdc_acm::{CdcAcmClass, State},
+};
 use static_cell::StaticCell;
+use timer::Timer;
 
 use crate::defmt_serial::timer::NOOP_WAKER;
 
@@ -108,13 +116,15 @@ struct SerialLogger;
 unsafe impl Logger for SerialLogger {
     fn acquire() {
         unsafe {
-            LOGGER_STATE.restore_state.get().write(critical_section::acquire());
+            LOGGER_STATE
+                .restore_state
+                .get()
+                .write(critical_section::acquire());
             (*LOGGER_STATE.encoder.get()).start_frame(push_log_bytes);
         }
     }
 
-    unsafe fn flush() {
-    }
+    unsafe fn flush() {}
 
     unsafe fn release() {
         unsafe {

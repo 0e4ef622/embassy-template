@@ -3,7 +3,8 @@
 
 macro_rules! static_byte_buffer {
     ($size:expr) => {{
-        static BUFFER: ::static_cell::ConstStaticCell<[u8; $size]> = ::static_cell::ConstStaticCell::new([0; $size]);
+        static BUFFER: ::static_cell::ConstStaticCell<[u8; $size]> =
+            ::static_cell::ConstStaticCell::new([0; $size]);
         BUFFER.take()
     }};
 }
@@ -11,8 +12,8 @@ macro_rules! static_byte_buffer {
 mod defmt_serial;
 
 use embassy_executor::Spawner;
-use embassy_nrf::usb::vbus_detect::HardwareVbusDetect;
 use embassy_nrf::usb::Driver;
+use embassy_nrf::usb::vbus_detect::HardwareVbusDetect;
 use embassy_nrf::{bind_interrupts, peripherals, usb};
 use embassy_time::Timer;
 use embassy_usb::{Builder, Config};

@@ -20,17 +20,21 @@ macro_rules! declare_static_future {
     ($static_name:ident = $fun_name:ident; $mod_name:ident) => {
         mod $mod_name {
             use core::cell::UnsafeCell;
-            use core::mem::MaybeUninit;
-            use core::sync::atomic::{AtomicBool, Ordering};
             use core::future::Future;
+            use core::mem::MaybeUninit;
             use core::pin::Pin;
+            use core::sync::atomic::{AtomicBool, Ordering};
 
             pub struct StaticFuture {
                 is_init: AtomicBool,
-                fut: UnsafeCell<MaybeUninit<(
-                    [u8; $crate::defmt_serial::sus::fut_size(super::$fun_name)],
-                    embassy_executor::_export::Align<{$crate::defmt_serial::sus::fut_align(super::$fun_name)}
-                >)>>,
+                fut: UnsafeCell<
+                    MaybeUninit<(
+                        [u8; $crate::defmt_serial::sus::fut_size(super::$fun_name)],
+                        embassy_executor::_export::Align<
+                            { $crate::defmt_serial::sus::fut_align(super::$fun_name) },
+                        >,
+                    )>,
+                >,
             }
 
             impl StaticFuture {
@@ -48,9 +52,7 @@ macro_rules! declare_static_future {
                 }
                 pub unsafe fn get(&self) -> Option<Pin<&'static mut impl Future>> {
                     if self.is_init.load(Ordering::Acquire) {
-                        unsafe {
-                            Some(Pin::static_mut(self._get(super::$fun_name)))
-                        }
+                        unsafe { Some(Pin::static_mut(self._get(super::$fun_name))) }
                     } else {
                         None
                     }
@@ -68,5 +70,5 @@ macro_rules! declare_static_future {
         }
 
         static $static_name: $mod_name::StaticFuture = $mod_name::StaticFuture::new();
-    }
+    };
 }
