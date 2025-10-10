@@ -5,22 +5,22 @@ mod timer;
 use core::{cell::UnsafeCell, panic::PanicInfo, sync::atomic::{AtomicBool, Ordering}, task::Context};
 
 use critical_section::RestoreState;
-use defmt::{Encoder, Logger};
+use defmt::{Encoder, Logger, unwrap};
 use embassy_executor::{task, Spawner};
-use embassy_nrf::{gpio::{Level, Output, OutputDrive}, peripherals::{P0_06, P0_08, P1_09, USBD}, usb::vbus_detect::HardwareVbusDetect};
+use embassy_nrf::usb::vbus_detect::HardwareVbusDetect;
 use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, pipe::Pipe};
 use timer::Timer;
 use embassy_usb::{class::cdc_acm::{CdcAcmClass, State}, Builder, UsbDevice};
-use static_cell::ConstStaticCell;
+use static_cell::StaticCell;
 
 use crate::defmt_serial::timer::NOOP_WAKER;
 
-type Driver = embassy_nrf::usb::Driver<'static, USBD, HardwareVbusDetect>;
+type Driver = embassy_nrf::usb::Driver<'static, HardwareVbusDetect>;
 
 /// Adds a CDC-ACM interface, runs the USB device and initializes the logger.
 pub fn init(spawner: &mut Spawner, mut builder: Builder<'static, Driver>) {
-    static STATE: ConstStaticCell<State> = ConstStaticCell::new(State::new());
-    let state = STATE.take();
+    static STATE: StaticCell<State> = StaticCell::new();
+    let state = STATE.init_with(State::new);
 
     let class = CdcAcmClass::new(&mut builder, state, 64);
     let usb = builder.build();
@@ -28,9 +28,9 @@ pub fn init(spawner: &mut Spawner, mut builder: Builder<'static, Driver>) {
     // Run the USB device.
     unsafe {
         USB_FUT.init(run_usb(usb));
-        spawner.must_spawn(usb_task());
+        spawner.spawn(unwrap!(usb_task()));
         LOG_FUT.init(log_loop(class));
-        spawner.must_spawn(log_task());
+        spawner.spawn(unwrap!(log_task()));
     }
 }
 

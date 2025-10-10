@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", features = ["arch-cortex-m", "executor-thread"] }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy.git", features = ["arch-cortex-m", "executor-thread", "defmt"] }
 embassy-nrf = { git = "https://github.com/embassy-rs/embassy.git", features = ["nrf52840", "time-driver-rtc1", "gpiote", "time", "unstable-pac", "defmt", "nfc-pins-as-gpio"] }
 embassy-time = { git = "https://github.com/embassy-rs/embassy.git", features = ["defmt-timestamp-uptime-ms"] }
 embassy-time-driver = { git = "https://github.com/embassy-rs/embassy.git" }
