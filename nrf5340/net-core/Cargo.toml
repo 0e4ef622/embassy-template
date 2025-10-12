@@ -17,3 +17,6 @@ defmt = "1"
 
 [profile.release]
 debug = 2
+
+[build-dependencies]
+memory-spec = "0.1.0"

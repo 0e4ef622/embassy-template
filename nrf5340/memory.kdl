@@ -1,0 +1,9 @@
+regions {
+    appcore_flash origin=0 length="1024K"
+    netcore_flash origin=0x0100_0000 length="256K"
+    appcore_ram origin=0x2000_0000 length="512K" {
+        low_ram origin=0x2000_0000 length="256K"
+        high_ram origin="appcore_ram.low_ram.end" length="256K"
+    }
+    netcore_ram origin=0x2100_0000 length="64K"
+}

@@ -15,5 +15,8 @@ defmt-rtt = "1"
 panic-probe = { version = "1", features = ["print-defmt"] }
 defmt = "1"
 
+[build-dependencies]
+memory-spec = "0.1.0"
+
 [profile.release]
 debug = 2
