@@ -33,9 +33,12 @@ pub fn init(spawner: &mut Spawner, mut builder: Builder<'static, Driver>) {
     let class = CdcAcmClass::new(&mut builder, state, 64);
     let usb = builder.build();
 
+    static USB_DEVICE: StaticCell<UsbDevice<'static, Driver>> = StaticCell::new();
+    let usb = USB_DEVICE.init(usb);
+
     // Run the USB device.
     unsafe {
-        USB_FUT.init(run_usb(usb));
+        USB_FUT.init(usb.run());
         spawner.spawn(unwrap!(usb_task()));
         LOG_FUT.init(log_loop(class));
         spawner.spawn(unwrap!(log_task()));
@@ -43,7 +46,7 @@ pub fn init(spawner: &mut Spawner, mut builder: Builder<'static, Driver>) {
 }
 
 static PIPE: Pipe<CriticalSectionRawMutex, 1024> = Pipe::new();
-async fn log_loop(mut class: CdcAcmClass<'static, Driver>) {
+async fn log_loop(mut class: CdcAcmClass<'static, Driver>) -> ! {
     class.wait_connection().await;
 
     let mut buf = [0; 64];
@@ -72,26 +75,18 @@ async fn log_loop(mut class: CdcAcmClass<'static, Driver>) {
     }
 }
 
-async fn run_usb(mut usb: UsbDevice<'static, Driver>) {
-    usb.run().await
+#[task]
+fn log_task() -> impl Future<Output = embassy_executor::_export::Never> {
+    unsafe { LOG_FUT.get().unwrap() }
 }
 
 #[task]
-async fn log_task() {
-    unsafe {
-        LOG_FUT.get().as_mut().unwrap_unchecked().await;
-    }
-}
-
-#[task]
-async fn usb_task() {
-    unsafe {
-        USB_FUT.get().as_mut().unwrap_unchecked().await;
-    }
+fn usb_task() -> impl Future<Output = embassy_executor::_export::Never> {
+    unsafe { USB_FUT.get().unwrap() }
 }
 
 declare_static_future!(LOG_FUT = log_loop; _log_loop);
-declare_static_future!(USB_FUT = run_usb; _run_usb);
+declare_static_future!(USB_FUT = UsbDevice::<'static, Driver>::run; _run_usb);
 
 struct LoggerState {
     restore_state: UnsafeCell<RestoreState>,
