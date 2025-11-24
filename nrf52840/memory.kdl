@@ -1,0 +1,4 @@
+regions {
+    flash origin=0 length="1M"
+    ram origin=0x2000_0000 length="256K"
+}
