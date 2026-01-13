@@ -1,6 +1,6 @@
 OUTPUT_DIR = build
-APP_TARGET_DIR = app-core/target
-NET_TARGET_DIR = net-core/target
+APP_TARGET_DIR = build/target-app
+NET_TARGET_DIR = build/target-net
 APP_ARTIFACT_DIR = $(APP_TARGET_DIR)/thumbv8m.main-none-eabihf/release
 NET_ARTIFACT_DIR = $(NET_TARGET_DIR)/thumbv8m.main-none-eabi/release
 
@@ -10,13 +10,13 @@ all: $(OUTPUT_DIR)/merged.hex
 $(OUTPUT_DIR):
 	mkdir "$(OUTPUT_DIR)"
 
-$(APP_ARTIFACT_DIR)/app-core: $(shell find ./app-core -path ./$(APP_TARGET_DIR) -prune -o -print)
+$(APP_ARTIFACT_DIR)/app-core: $(shell find ./app-core)
 	cd app-core && cargo build --release
 
 $(OUTPUT_DIR)/app-core.elf: $(APP_ARTIFACT_DIR)/app-core | $(OUTPUT_DIR)
 	cp $(APP_ARTIFACT_DIR)/app-core $@
 
-$(NET_ARTIFACT_DIR)/net-core: $(shell find ./net-core -path ./$(NET_TARGET_DIR) -prune -o -print)
+$(NET_ARTIFACT_DIR)/net-core: $(shell find ./net-core)
 	cd net-core && cargo build --release
 
 $(OUTPUT_DIR)/net-core.elf: $(NET_ARTIFACT_DIR)/net-core | $(OUTPUT_DIR)
@@ -30,7 +30,7 @@ $(OUTPUT_DIR)/merged.hex: $(OUTPUT_DIR)/app-core.hex $(OUTPUT_DIR)/net-core.hex
 
 .PHONY: cleanall
 cleanall:
-	rm -r $(OUTPUT_DIR) $(APP_TARGET_DIR) $(NET_TARGET_DIR)
+	rm -r $(APP_TARGET_DIR) $(NET_TARGET_DIR) $(OUTPUT_DIR)
 
 .PHONY: clean
 clean:

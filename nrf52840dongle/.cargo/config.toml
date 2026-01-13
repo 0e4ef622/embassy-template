@@ -1,10 +1,18 @@
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
-# replace nRF82840_xxAA with your chip as listed in `probe-rs chip list`
 runner = "nrfdfu"
 
 [build]
 target = "thumbv7em-none-eabihf"
+rustflags = [
+    "-C", "target-cpu=cortex-m4",
+    "-C", "link-arg=-Tlink.x",
+    "-C", "link-arg=-Tdefmt.x",
+    # This is needed if your flash or ram addresses are not aligned to 0x10000 in memory.x
+    # See https://github.com/rust-embedded/cortex-m-quickstart/pull/95
+    "-C", "link-arg=--nmagic",
+    "-C", "link-arg=--print-memory-usage",
+    "-W", "linker-messages",
+]
 
 [env]
 DEFMT_LOG = "info"
-# RUSTC_LOG = "rustc_codegen_ssa::back::link=info"

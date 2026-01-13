@@ -11,9 +11,9 @@ rustflags = [
     # See https://github.com/rust-embedded/cortex-m-quickstart/pull/95
     "-C", "link-arg=--nmagic",
     "-C", "link-arg=--print-memory-usage",
+    "-W", "linker-messages",
 ]
+target-dir = "../build/target-app"
 
 [env]
 DEFMT_LOG = "info"
-# Uncomment to see the output of --print-memory-usage
-# RUSTC_LOG = "rustc_codegen_ssa::back::link=info"

@@ -347,6 +347,7 @@ source = "git+https://github.com/embassy-rs/embassy.git#35b0ba4ce0fed7588febe504
 dependencies = [
  "cfg-if",
  "critical-section",
+ "defmt",
  "document-features",
  "embassy-time-driver",
  "embedded-hal 0.2.7",
