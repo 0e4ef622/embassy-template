@@ -16,7 +16,7 @@ $(APP_ARTIFACT_DIR)/app-core: $(shell find ./app-core)
 $(OUTPUT_DIR)/app-core.elf: $(APP_ARTIFACT_DIR)/app-core | $(OUTPUT_DIR)
 	cp $(APP_ARTIFACT_DIR)/app-core $@
 
-$(NET_ARTIFACT_DIR)/net-core: $(shell find ./net-core)
+$(NET_ARTIFACT_DIR)/net-core: $(shell find ./net-core) $(APP_ARTIFACT_DIR)/app-core
 	cd net-core && cargo build --release
 
 $(OUTPUT_DIR)/net-core.elf: $(NET_ARTIFACT_DIR)/net-core | $(OUTPUT_DIR)
